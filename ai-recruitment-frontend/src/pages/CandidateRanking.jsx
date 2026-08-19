@@ -55,6 +55,10 @@ function CandidateRanking() {
     <MainLayout>
       <div className="max-w-7xl mx-auto">
 
+        {/* =========================
+            Page Header
+        ========================= */}
+
         <div className="mb-10">
 
           <h1 className="text-4xl font-bold text-gray-800">
@@ -66,6 +70,11 @@ function CandidateRanking() {
           </p>
 
         </div>
+
+
+        {/* =========================
+            No Candidates
+        ========================= */}
 
         {candidates.length === 0 ? (
 
@@ -83,6 +92,10 @@ function CandidateRanking() {
 
         ) : (
 
+          /* =========================
+             Candidate List
+          ========================= */
+
           <div className="space-y-8">
 
             {candidates.map((candidate, index) => {
@@ -93,14 +106,38 @@ function CandidateRanking() {
 
                 <div
                   key={candidate.id}
-                  className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition duration-300 border border-gray-100"
+                  className="
+                    bg-white
+                    rounded-2xl
+                    shadow-lg
+                    hover:shadow-xl
+                    transition
+                    duration-300
+                    border
+                    border-gray-100
+                  "
                 >
 
                   <div className="p-8">
 
-                    <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-8">
+                    {/* =========================
+                        Candidate Header
+                    ========================= */}
+
+                    <div
+                      className="
+                        flex
+                        flex-col
+                        lg:flex-row
+                        lg:justify-between
+                        lg:items-start
+                        gap-8
+                      "
+                    >
 
                       <div className="flex gap-6">
+
+                        {/* Avatar */}
 
                         <div
                           className="
@@ -120,12 +157,15 @@ function CandidateRanking() {
                           {getInitials(candidate.name)}
                         </div>
 
+
+                        {/* Candidate Information */}
+
                         <div>
 
                           <div className="flex items-center gap-3">
 
                             <h2 className="text-2xl font-bold text-gray-800">
-                                {candidate.name}
+                              {candidate.name}
                             </h2>
 
                           </div>
@@ -133,6 +173,9 @@ function CandidateRanking() {
                           <p className="text-gray-500 mt-1">
                             Rank #{index + 1}
                           </p>
+
+
+                          {/* Contact Information */}
 
                           <div className="mt-5 space-y-2">
 
@@ -156,6 +199,11 @@ function CandidateRanking() {
 
                       </div>
 
+
+                      {/* =========================
+                          Match Score
+                      ========================= */}
+
                       <div className="w-full lg:w-80">
 
                         <div className="flex justify-between mb-2">
@@ -164,7 +212,9 @@ function CandidateRanking() {
                             Match Score
                           </span>
 
-                          <span className={`font-bold ${match.text}`}>
+                          <span
+                            className={`font-bold ${match.text}`}
+                          >
                             {candidate.match_score}%
                           </span>
 
@@ -173,7 +223,13 @@ function CandidateRanking() {
                         <div className="w-full bg-gray-200 rounded-full h-4">
 
                           <div
-                            className={`${match.bar} h-4 rounded-full transition-all duration-700`}
+                            className={`
+                              ${match.bar}
+                              h-4
+                              rounded-full
+                              transition-all
+                              duration-700
+                            `}
                             style={{
                               width: `${candidate.match_score}%`,
                             }}
@@ -185,9 +241,17 @@ function CandidateRanking() {
 
                     </div>
 
+
                     <hr className="my-8" />
 
+
+                    {/* =========================
+                        Summary + Skills
+                    ========================= */}
+
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+                      {/* Professional Summary */}
 
                       <div>
 
@@ -198,6 +262,7 @@ function CandidateRanking() {
                         <div className="bg-gray-50 rounded-xl p-5">
 
                           {candidate.summary ? (
+
                             <>
 
                               <p className="text-gray-700 leading-8 text-[15px]">
@@ -210,22 +275,31 @@ function CandidateRanking() {
 
                               </p>
 
+
                               {candidate.summary.length > 220 && (
 
                                 <button
                                   onClick={() =>
                                     toggleSummary(candidate.id)
                                   }
-                                  className="mt-4 text-indigo-600 hover:text-indigo-800 font-semibold"
+                                  className="
+                                    mt-4
+                                    text-indigo-600
+                                    hover:text-indigo-800
+                                    font-semibold
+                                  "
                                 >
+
                                   {expandedSummaries[candidate.id]
                                     ? "Show Less"
                                     : "Read More"}
+
                                 </button>
 
                               )}
 
                             </>
+
                           ) : (
 
                             <p className="text-gray-500">
@@ -238,6 +312,11 @@ function CandidateRanking() {
 
                       </div>
 
+
+                      {/* =========================
+                          Skills
+                      ========================= */}
+
                       <div>
 
                         <h3 className="font-bold text-lg mb-3">
@@ -245,14 +324,23 @@ function CandidateRanking() {
                         </h3>
 
                         <div className="flex flex-wrap gap-3">
-                                                    {candidate.matched_skills &&
+
+                          {candidate.matched_skills &&
                           candidate.matched_skills.length > 0 ? (
 
                             candidate.matched_skills.map((skill) => (
 
                               <span
                                 key={skill}
-                                className="px-4 py-2 rounded-full bg-green-100 text-green-700 font-medium text-sm"
+                                className="
+                                  px-4
+                                  py-2
+                                  rounded-full
+                                  bg-green-100
+                                  text-green-700
+                                  font-medium
+                                  text-sm
+                                "
                               >
                                 {skill}
                               </span>
@@ -269,6 +357,9 @@ function CandidateRanking() {
 
                         </div>
 
+
+                        {/* All Candidate Skills */}
+
                         {candidate.candidate_skills &&
                           candidate.candidate_skills.length > 0 && (
 
@@ -280,80 +371,63 @@ function CandidateRanking() {
 
                               <div className="flex flex-wrap gap-2">
 
-                                {candidate.candidate_skills.map((skill) => (
+                                {candidate.candidate_skills.map(
+                                  (skill) => (
 
-                                  <span
-                                    key={skill}
-                                    className="px-3 py-1 rounded-full bg-gray-100 text-gray-700 text-sm"
-                                  >
-                                    {skill}
-                                  </span>
+                                    <span
+                                      key={skill}
+                                      className="
+                                        px-3
+                                        py-1
+                                        rounded-full
+                                        bg-gray-100
+                                        text-gray-700
+                                        text-sm
+                                      "
+                                    >
+                                      {skill}
+                                    </span>
 
-                                ))}
+                                  )
+                                )}
 
                               </div>
 
                             </>
 
-                        )}
+                          )}
 
                       </div>
 
                     </div>
+
+
+                    {/* =========================
+                        Candidate Action
+                    ========================= */}
 
                     <div className="mt-8 flex flex-wrap gap-4">
 
                       <button
                         onClick={() =>
                           navigate("/candidate-profile", {
-                             state: {
-                                candidate,
-                              },
+                            state: {
+                              candidate,
+                            },
                           })
                         }
                         className="
-                            px-5
-                            py-2.5
-                            rounded-lg
-                            bg-indigo-600
-                            hover:bg-indigo-700
-                            text-white
-                            font-semibold
-                            transition
-                        "
-                      >
-                        View Profile
-                      </button>
-
-                      <button
-                        className="
                           px-5
                           py-2.5
                           rounded-lg
-                          border
-                          border-indigo-600
-                          text-indigo-600
-                          hover:bg-indigo-50
-                          font-semibold
-                          transition
-                        "
-                      >
-                        View Resume
-                      </button>
-
-                      <button
-                        className="
-                          px-5
-                          py-2.5
-                          rounded-lg
-                          bg-emerald-600
-                          hover:bg-emerald-700
+                          bg-indigo-600
+                          hover:bg-indigo-700
                           text-white
                           font-semibold
                           transition
                         "
                       >
-                        Ask AI
+                        View Profile
                       </button>
 
                     </div>
@@ -373,7 +447,6 @@ function CandidateRanking() {
       </div>
 
     </MainLayout>
-
   );
 }
 

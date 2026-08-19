@@ -76,15 +76,88 @@ def extract_text_from_pdf(pdf_path: str) -> str:
 
 def extract_text_from_docx(docx_path: str) -> str:
     """
-    Extract text from DOCX files.
+    Extract text from DOCX files including:
+    - Normal paragraphs
+    - Tables
+    - Headers
+    - Footers
+    - Text boxes / shapes
     """
+
     doc = Document(docx_path)
 
-    extracted_text = "\n".join(
-        para.text for para in doc.paragraphs
-    )
+    extracted_parts = []
 
-    return clean_text(extracted_text)
+    # ----------------------------------------
+    # Normal paragraphs
+    # ----------------------------------------
+    for para in doc.paragraphs:
+        text = para.text.strip()
+
+        if text:
+            extracted_parts.append(text)
+
+    # ----------------------------------------
+    # Tables
+    # ----------------------------------------
+    for table in doc.tables:
+
+        for row in table.rows:
+
+            row_text = []
+
+            for cell in row.cells:
+
+                cell_text = cell.text.strip()
+
+                if cell_text:
+                    row_text.append(cell_text)
+
+            if row_text:
+                extracted_parts.append(
+                    " | ".join(row_text)
+                )
+
+    # ----------------------------------------
+    # Text boxes / shapes
+    # ----------------------------------------
+    for element in doc.element.body.iter():
+
+        if element.tag.endswith("}t"):
+            text = element.text
+
+            if text and text.strip():
+                extracted_parts.append(
+                    text.strip()
+                )
+
+    # ----------------------------------------
+    # Headers
+    # ----------------------------------------
+    for section in doc.sections:
+
+        for para in section.header.paragraphs:
+
+            text = para.text.strip()
+
+            if text:
+                extracted_parts.append(text)
+
+    # ----------------------------------------
+    # Footers
+    # ----------------------------------------
+    for section in doc.sections:
+
+        for para in section.footer.paragraphs:
+
+            text = para.text.strip()
+
+            if text:
+                extracted_parts.append(text)
+
+    return clean_text(
+        "\n".join(extracted_parts)
+    )
 
 
 def extract_resume_text(file_path: str) -> str:

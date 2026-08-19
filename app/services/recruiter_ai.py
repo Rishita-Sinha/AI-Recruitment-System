@@ -50,11 +50,11 @@ Rules:
 """
 
     print("✅ Prompt created")
-    print("Calling Ollama...")
+    print("Calling Gemini...")
 
     response = ask_llm(prompt)
 
-    print("✅ Ollama returned successfully")
+    print("✅ Gemini returned successfully")
     print("========== AI Recruiter Finished ==========")
 
     return response

@@ -11,6 +11,8 @@ function JobDescription() {
     title: "",
     experience: "",
     skills: "",
+    qualification: "",
+    location: "",
     description: "",
   });
 
@@ -98,6 +100,35 @@ function JobDescription() {
               className="w-full border rounded-lg p-3"
               placeholder="Python, FastAPI, SQL, Docker"
               required
+            />
+          </div>
+          <div>
+            <label className="block font-semibold mb-2">
+              Required Qualification
+            </label>
+
+            <input
+              type="text"
+              name="qualification"
+              value={formData.qualification}
+              onChange={handleChange}
+              className="w-full border rounded-lg p-3"
+              placeholder="B.Tech Computer Science, MCA, MBA..."
+              required
+            />
+          </div>
+          <div>
+            <label className="block font-semibold mb-2">
+              Preferred Location
+            </label>
+
+            <input
+              type="text"
+              name="location"
+              value={formData.location}
+              onChange={handleChange}
+              className="w-full border rounded-lg p-3"
+              placeholder="Guwahati, Bangalore, Remote..."
             />
           </div>
 

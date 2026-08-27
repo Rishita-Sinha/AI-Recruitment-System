@@ -1,13 +1,24 @@
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+
 import MainLayout from "../layouts/MainLayout";
 
 function CandidateRanking() {
   const location = useLocation();
   const navigate = useNavigate();
+
+  // Get candidates and job match ID from JobDescription page
   const candidates = location.state?.candidates || [];
+  const jobMatchId = location.state?.jobMatchId;
+
+  console.log("JOB MATCH ID RECEIVED:", jobMatchId);
+  console.log("NAVIGATION STATE:", location.state);
 
   const [expandedSummaries, setExpandedSummaries] = useState({});
+
+  // =========================================================
+  // Toggle Candidate Summary
+  // =========================================================
 
   const toggleSummary = (id) => {
     setExpandedSummaries((prev) => ({
@@ -15,6 +26,10 @@ function CandidateRanking() {
       [id]: !prev[id],
     }));
   };
+
+  // =========================================================
+  // Get Candidate Initials
+  // =========================================================
 
   const getInitials = (name) => {
     if (!name) return "?";
@@ -26,24 +41,31 @@ function CandidateRanking() {
       .toUpperCase();
   };
 
+  // =========================================================
+  // Match Score Color
+  // =========================================================
+
   const getMatchColor = (score) => {
-    if (score >= 90)
+    if (score >= 90) {
       return {
         text: "text-green-700",
         bar: "bg-green-500",
       };
+    }
 
-    if (score >= 75)
+    if (score >= 75) {
       return {
         text: "text-blue-700",
         bar: "bg-blue-500",
       };
+    }
 
-    if (score >= 50)
+    if (score >= 50) {
       return {
         text: "text-yellow-700",
         bar: "bg-yellow-500",
       };
+    }
 
     return {
       text: "text-red-700",
@@ -51,16 +73,39 @@ function CandidateRanking() {
     };
   };
 
+  // =========================================================
+  // Open Candidate Profile
+  // =========================================================
+
+  const openCandidateProfile = (candidate) => {
+    console.log("SENDING TO PROFILE:", {
+      candidate,
+      job_match_id: jobMatchId,
+    });
+
+    navigate("/candidate-profile", {
+      state: {
+        candidate: {
+          ...candidate,
+          job_match_id: jobMatchId,
+        },
+      },
+    });
+  };
+
+  // =========================================================
+  // Page
+  // =========================================================
+
   return (
     <MainLayout>
       <div className="max-w-7xl mx-auto">
 
-        {/* =========================
+        {/* =====================================================
             Page Header
-        ========================= */}
+        ===================================================== */}
 
         <div className="mb-10">
-
           <h1 className="text-4xl font-bold text-gray-800">
             Candidate Ranking
           </h1>
@@ -69,17 +114,20 @@ function CandidateRanking() {
             AI ranked candidates based on the submitted job description.
           </p>
 
+          {/* Debug information - useful while testing */}
+          {jobMatchId && (
+            <p className="text-xs text-gray-400 mt-2">
+              Job Match ID: {jobMatchId}
+            </p>
+          )}
         </div>
 
-
-        {/* =========================
+        {/* =====================================================
             No Candidates
-        ========================= */}
+        ===================================================== */}
 
         {candidates.length === 0 ? (
-
           <div className="bg-white rounded-xl shadow p-12 text-center">
-
             <h2 className="text-2xl font-semibold text-gray-700">
               No Candidates Found
             </h2>
@@ -87,23 +135,19 @@ function CandidateRanking() {
             <p className="text-gray-500 mt-3">
               Try another Job Description.
             </p>
-
           </div>
-
         ) : (
 
-          /* =========================
+          /* ===================================================
              Candidate List
-          ========================= */
+          =================================================== */
 
           <div className="space-y-8">
 
             {candidates.map((candidate, index) => {
-
-              const match = getMatchColor(candidate.match_score);
+              const match = getMatchColor(candidate.match_score || 0);
 
               return (
-
                 <div
                   key={candidate.id}
                   className="
@@ -120,9 +164,9 @@ function CandidateRanking() {
 
                   <div className="p-8">
 
-                    {/* =========================
+                    {/* =================================================
                         Candidate Header
-                    ========================= */}
+                    ================================================= */}
 
                     <div
                       className="
@@ -157,23 +201,19 @@ function CandidateRanking() {
                           {getInitials(candidate.name)}
                         </div>
 
-
                         {/* Candidate Information */}
 
                         <div>
 
                           <div className="flex items-center gap-3">
-
                             <h2 className="text-2xl font-bold text-gray-800">
-                              {candidate.name}
+                              {candidate.name || "Unknown Candidate"}
                             </h2>
-
                           </div>
 
                           <p className="text-gray-500 mt-1">
                             Rank #{index + 1}
                           </p>
-
 
                           {/* Contact Information */}
 
@@ -196,13 +236,11 @@ function CandidateRanking() {
                           </div>
 
                         </div>
-
                       </div>
 
-
-                      {/* =========================
+                      {/* =================================================
                           Match Score
-                      ========================= */}
+                      ================================================= */}
 
                       <div className="w-full lg:w-80">
 
@@ -215,7 +253,7 @@ function CandidateRanking() {
                           <span
                             className={`font-bold ${match.text}`}
                           >
-                            {candidate.match_score}%
+                            {candidate.match_score || 0}%
                           </span>
 
                         </div>
@@ -231,7 +269,7 @@ function CandidateRanking() {
                               duration-700
                             `}
                             style={{
-                              width: `${candidate.match_score}%`,
+                              width: `${candidate.match_score || 0}%`,
                             }}
                           />
 
@@ -241,13 +279,11 @@ function CandidateRanking() {
 
                     </div>
 
-
                     <hr className="my-8" />
 
-
-                    {/* =========================
+                    {/* =================================================
                         Summary + Skills
-                    ========================= */}
+                    ================================================= */}
 
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
 
@@ -262,22 +298,16 @@ function CandidateRanking() {
                         <div className="bg-gray-50 rounded-xl p-5">
 
                           {candidate.summary ? (
-
                             <>
-
                               <p className="text-gray-700 leading-8 text-[15px]">
-
                                 {expandedSummaries[candidate.id]
                                   ? candidate.summary
                                   : candidate.summary.length > 220
                                   ? `${candidate.summary.slice(0, 220)}...`
                                   : candidate.summary}
-
                               </p>
 
-
                               {candidate.summary.length > 220 && (
-
                                 <button
                                   onClick={() =>
                                     toggleSummary(candidate.id)
@@ -289,33 +319,25 @@ function CandidateRanking() {
                                     font-semibold
                                   "
                                 >
-
                                   {expandedSummaries[candidate.id]
                                     ? "Show Less"
                                     : "Read More"}
-
                                 </button>
-
                               )}
-
                             </>
-
                           ) : (
-
                             <p className="text-gray-500">
                               No summary available.
                             </p>
-
                           )}
 
                         </div>
 
                       </div>
 
-
-                      {/* =========================
+                      {/* =================================================
                           Skills
-                      ========================= */}
+                      ================================================= */}
 
                       <div>
 
@@ -327,9 +349,7 @@ function CandidateRanking() {
 
                           {candidate.matched_skills &&
                           candidate.matched_skills.length > 0 ? (
-
                             candidate.matched_skills.map((skill) => (
-
                               <span
                                 key={skill}
                                 className="
@@ -344,77 +364,61 @@ function CandidateRanking() {
                               >
                                 {skill}
                               </span>
-
                             ))
-
                           ) : (
-
                             <span className="text-red-500">
                               No matched skills found.
                             </span>
-
                           )}
 
                         </div>
 
-
                         {/* All Candidate Skills */}
 
                         {candidate.candidate_skills &&
-                          candidate.candidate_skills.length > 0 && (
+                        candidate.candidate_skills.length > 0 && (
+                          <>
+                            <h4 className="font-semibold mt-6 mb-3">
+                              All Candidate Skills
+                            </h4>
 
-                            <>
+                            <div className="flex flex-wrap gap-2">
 
-                              <h4 className="font-semibold mt-6 mb-3">
-                                All Candidate Skills
-                              </h4>
+                              {candidate.candidate_skills.map(
+                                (skill) => (
+                                  <span
+                                    key={skill}
+                                    className="
+                                      px-3
+                                      py-1
+                                      rounded-full
+                                      bg-gray-100
+                                      text-gray-700
+                                      text-sm
+                                    "
+                                  >
+                                    {skill}
+                                  </span>
+                                )
+                              )}
 
-                              <div className="flex flex-wrap gap-2">
-
-                                {candidate.candidate_skills.map(
-                                  (skill) => (
-
-                                    <span
-                                      key={skill}
-                                      className="
-                                        px-3
-                                        py-1
-                                        rounded-full
-                                        bg-gray-100
-                                        text-gray-700
-                                        text-sm
-                                      "
-                                    >
-                                      {skill}
-                                    </span>
-
-                                  )
-                                )}
-
-                              </div>
-
-                            </>
-
-                          )}
+                            </div>
+                          </>
+                        )}
 
                       </div>
 
                     </div>
 
-
-                    {/* =========================
+                    {/* =================================================
                         Candidate Action
-                    ========================= */}
+                    ================================================= */}
 
                     <div className="mt-8 flex flex-wrap gap-4">
 
                       <button
                         onClick={() =>
-                          navigate("/candidate-profile", {
-                            state: {
-                              candidate,
-                            },
-                          })
+                          openCandidateProfile(candidate)
                         }
                         className="
                           px-5
@@ -435,17 +439,13 @@ function CandidateRanking() {
                   </div>
 
                 </div>
-
               );
-
             })}
 
           </div>
-
         )}
 
       </div>
-
     </MainLayout>
   );
 }

@@ -1,34 +1,58 @@
 import os
+
 from dotenv import load_dotenv
+
+from app.database import SessionLocal
+from app.models.llm_config import LLMConfig
+from app.utils.encryption import decrypt_api_key
 
 load_dotenv()
 
 
 # =========================================================
-# LLM CONFIGURATION
+# DATABASE LLM CONFIGURATION
 # =========================================================
 
-LLM_PROVIDER = os.getenv("LLM_PROVIDER", "gemini").lower()
-LLM_MODEL = os.getenv("LLM_MODEL", "").strip()
+def get_active_llm_config():
+    """
+    Get the currently active LLM configuration from PostgreSQL.
+    """
+
+    db = SessionLocal()
+
+    try:
+        config = (
+            db.query(LLMConfig)
+            .filter(LLMConfig.is_active == True)
+            .first()
+        )
+
+        return config
+
+    finally:
+        db.close()
 
 
 # =========================================================
 # Gemini
 # =========================================================
 
-def _ask_gemini(prompt: str) -> str:
-    from google import genai
+def _ask_gemini(
+    prompt: str,
+    model: str,
+    api_key: str,
+) -> str:
 
-    api_key = os.getenv("GEMINI_API_KEY")
+    from google import genai
 
     if not api_key:
         raise RuntimeError(
-            "GEMINI_API_KEY is not configured in the .env file."
+            "Gemini API key is not configured."
         )
 
-    model = LLM_MODEL or "gemini-2.5-flash"
-
-    client = genai.Client(api_key=api_key)
+    client = genai.Client(
+        api_key=api_key
+    )
 
     response = client.models.generate_content(
         model=model,
@@ -42,24 +66,22 @@ def _ask_gemini(prompt: str) -> str:
 # OpenAI
 # =========================================================
 
-def _ask_openai(prompt: str) -> str:
-    from openai import OpenAI
+def _ask_openai(
+    prompt: str,
+    model: str,
+    api_key: str,
+) -> str:
 
-    api_key = os.getenv("OPENAI_API_KEY")
+    from openai import OpenAI
 
     if not api_key:
         raise RuntimeError(
-            "OPENAI_API_KEY is not configured in the .env file."
+            "OpenAI API key is not configured."
         )
 
-    model = LLM_MODEL
-
-    if not model:
-        raise RuntimeError(
-            "LLM_MODEL must be specified when using OpenAI."
-        )
-
-    client = OpenAI(api_key=api_key)
+    client = OpenAI(
+        api_key=api_key
+    )
 
     response = client.responses.create(
         model=model,
@@ -73,24 +95,22 @@ def _ask_openai(prompt: str) -> str:
 # Anthropic Claude
 # =========================================================
 
-def _ask_claude(prompt: str) -> str:
-    from anthropic import Anthropic
+def _ask_claude(
+    prompt: str,
+    model: str,
+    api_key: str,
+) -> str:
 
-    api_key = os.getenv("ANTHROPIC_API_KEY")
+    from anthropic import Anthropic
 
     if not api_key:
         raise RuntimeError(
-            "ANTHROPIC_API_KEY is not configured in the .env file."
+            "Anthropic API key is not configured."
         )
 
-    model = LLM_MODEL
-
-    if not model:
-        raise RuntimeError(
-            "LLM_MODEL must be specified when using Claude."
-        )
-
-    client = Anthropic(api_key=api_key)
+    client = Anthropic(
+        api_key=api_key
+    )
 
     response = client.messages.create(
         model=model,
@@ -110,32 +130,58 @@ def _ask_claude(prompt: str) -> str:
 # Ollama
 # =========================================================
 
-def _ask_ollama(prompt: str) -> str:
-    import requests
+def _ask_ollama(
+    prompt: str,
+    model: str,
+    base_url: str | None,
+) -> str:
 
-    model = LLM_MODEL
+    import requests
 
     if not model:
         raise RuntimeError(
-            "LLM_MODEL must be specified when using Ollama."
+            "Ollama model is not configured."
         )
 
-    base_url = os.getenv(
-        "OLLAMA_BASE_URL",
-        "http://localhost:11434",
+    base_url = (
+        base_url
+        or "http://localhost:11434"
     )
 
-    url = f"{base_url.rstrip('/')}/api/generate"
-
-    response = requests.post(
-        url,
-        json={
-            "model": model,
-            "prompt": prompt,
-            "stream": False,
-        },
-        timeout=300,
+    url = (
+        f"{base_url.rstrip('/')}"
+        "/api/generate"
     )
+
+    try:
+        response = requests.post(
+            url,
+            json={
+                "model": model,
+                "prompt": prompt,
+                "stream": False,
+            },
+            timeout=60,
+    )
+
+        response.raise_for_status()
+
+    except requests.exceptions.ConnectionError as exc:
+        raise RuntimeError(
+            "Ollama service is unavailable. "
+            "Please make sure the Ollama server is running."
+        ) from exc
+
+    except requests.exceptions.Timeout as exc:
+        raise RuntimeError(
+            "Ollama took too long to respond. "
+            "Please check the Ollama server and model."
+        ) from exc
+
+    except requests.exceptions.RequestException as exc:
+        raise RuntimeError(
+            f"Ollama request failed: {exc}"
+        ) from exc
 
     response.raise_for_status()
 
@@ -148,39 +194,36 @@ def _ask_ollama(prompt: str) -> str:
 # OpenAI-Compatible API
 # =========================================================
 
-def _ask_openai_compatible(prompt: str) -> str:
+def _ask_openai_compatible(
+    prompt: str,
+    model: str,
+    api_key: str | None,
+    base_url: str | None,
+) -> str:
+
     from openai import OpenAI
-
-    api_key = os.getenv(
-        "OPENAI_COMPATIBLE_API_KEY",
-        "not-required",
-    )
-
-    base_url = os.getenv("OPENAI_COMPATIBLE_BASE_URL")
-
-    model = LLM_MODEL
 
     if not base_url:
         raise RuntimeError(
-            "OPENAI_COMPATIBLE_BASE_URL is not configured."
-        )
-
-    if not model:
-        raise RuntimeError(
-            "LLM_MODEL must be specified."
+            "OpenAI-compatible base URL is not configured."
         )
 
     client = OpenAI(
-        api_key=api_key,
+        api_key=api_key or "not-required",
         base_url=base_url,
     )
 
-    response = client.responses.create(
+    response = client.chat.completions.create(
         model=model,
-        input=prompt,
+        messages=[
+            {
+                "role": "user",
+                "content": prompt,
+            }
+        ],
     )
 
-    return response.output_text
+    return response.choices[0].message.content
 
 
 # =========================================================
@@ -189,35 +232,114 @@ def _ask_openai_compatible(prompt: str) -> str:
 
 def ask_llm(prompt: str) -> str:
 
-    provider = LLM_PROVIDER
+    config = get_active_llm_config()
+
+    # -----------------------------------------------------
+    # Temporary fallback to .env
+    # -----------------------------------------------------
+    # This keeps the existing Gemini setup working if
+    # there is no active database configuration.
+    # -----------------------------------------------------
+
+    if config is None:
+
+        provider = os.getenv(
+            "LLM_PROVIDER",
+            "gemini",
+        ).lower()
+
+        model = os.getenv(
+            "LLM_MODEL",
+            "",
+        ).strip()
+
+        print("========================================")
+        print("LLM Source   : .env fallback")
+        print(f"LLM Provider : {provider}")
+        print(f"LLM Model    : {model or 'provider default'}")
+        print("========================================")
+
+        if provider == "gemini":
+
+            return _ask_gemini(
+                prompt,
+                model or "gemini-2.5-flash",
+                os.getenv("GEMINI_API_KEY"),
+            )
+
+        raise RuntimeError(
+            "No active LLM configuration found."
+        )
+
+    # -----------------------------------------------------
+    # Database configuration
+    # -----------------------------------------------------
+
+    provider = config.provider.lower()
+    model = config.model
+    api_key = decrypt_api_key(config.api_key)
+    base_url = config.base_url
 
     print("========================================")
+    print("LLM Source   : PostgreSQL")
     print(f"LLM Provider : {provider}")
-    print(f"LLM Model    : {LLM_MODEL or 'provider default'}")
+    print(f"LLM Model    : {model}")
     print("========================================")
+
+    # -----------------------------------------------------
+    # Provider selection
+    # -----------------------------------------------------
 
     if provider == "gemini":
-        return _ask_gemini(prompt)
+
+        return _ask_gemini(
+            prompt,
+            model,
+            api_key,
+        )
 
     elif provider == "openai":
-        return _ask_openai(prompt)
 
-    elif provider in ("claude", "anthropic"):
-        return _ask_claude(prompt)
+        return _ask_openai(
+            prompt,
+            model,
+            api_key,
+        )
+
+    elif provider in (
+        "claude",
+        "anthropic",
+    ):
+
+        return _ask_claude(
+            prompt,
+            model,
+            api_key,
+        )
 
     elif provider == "ollama":
-        return _ask_ollama(prompt)
+
+        return _ask_ollama(
+            prompt,
+            model,
+            base_url,
+        )
 
     elif provider in (
         "openai-compatible",
         "openai_compatible",
+        "groq",
     ):
-        return _ask_openai_compatible(prompt)
+
+        return _ask_openai_compatible(
+            prompt,
+            model,
+            api_key,
+            base_url,
+        )
 
     else:
+
         raise RuntimeError(
-            f"Unsupported LLM_PROVIDER: {provider}. "
-            f"Supported providers are: "
-            f"gemini, openai, claude, ollama, "
-            f"openai-compatible."
+            f"Unsupported LLM provider: {provider}"
         )

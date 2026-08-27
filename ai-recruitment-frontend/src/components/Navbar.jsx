@@ -1,9 +1,6 @@
 import { useEffect, useState } from "react";
 import {
-  Bell,
-  Search,
   LogOut,
-  UserCircle,
 } from "lucide-react";
 
 function Navbar() {
@@ -92,98 +89,6 @@ function Navbar() {
       ========================= */}
 
       <div className="flex items-center gap-4">
-
-        {/* =========================
-            Search
-        ========================= */}
-
-        <div className="relative hidden md:block">
-
-          <Search
-            size={18}
-            className="
-              absolute
-              left-3
-              top-1/2
-              -translate-y-1/2
-              text-gray-400
-            "
-          />
-
-          <input
-            type="text"
-            placeholder="Search..."
-            className="
-              w-64
-              pl-10
-              pr-4
-              py-2.5
-              rounded-xl
-              border
-              border-gray-200
-              bg-gray-50
-              text-sm
-              text-gray-800
-              placeholder:text-gray-400
-              outline-none
-              transition-all
-              duration-200
-              focus:bg-white
-              focus:border-[#08AFC5]
-              focus:ring-2
-              focus:ring-[#08AFC5]/15
-            "
-          />
-
-        </div>
-
-
-        {/* =========================
-            Notification
-        ========================= */}
-
-        <button
-          type="button"
-          className="
-            relative
-            p-2.5
-            rounded-xl
-            text-gray-500
-            hover:text-[#087FA8]
-            hover:bg-[#08AFC5]/10
-            transition-all
-            duration-200
-          "
-          aria-label="Notifications"
-        >
-
-          <Bell size={21} />
-
-          {/* Notification Dot */}
-
-          <span
-            className="
-              absolute
-              top-2
-              right-2
-              w-2
-              h-2
-              rounded-full
-              bg-[#12B8A6]
-              border-2
-              border-white
-            "
-          />
-
-        </button>
-
-
-        {/* =========================
-            Divider
-        ========================= */}
-
-        <div className="h-8 w-px bg-gray-200" />
-
 
         {/* =========================
             Recruiter Profile

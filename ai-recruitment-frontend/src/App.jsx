@@ -10,6 +10,7 @@ import EditCandidate from "./pages/EditCandidate";
 import JobDescription from "./pages/JobDescription";
 import CandidateRanking from "./pages/CandidateRanking";
 import CandidateProfile from "./pages/CandidateProfile";
+import CandidateInterview from "./pages/CandidateInterview";
 import Chatbot from "./pages/Chatbot";
 import Settings from "./pages/Settings";
 
@@ -28,6 +29,15 @@ function App() {
       <Route path="/login" element={<Login />} />
 
       <Route path="/signup" element={<Signup />} />
+
+      {/* ========================================
+         PUBLIC CANDIDATE INTERVIEW
+      ======================================== */}
+
+      <Route
+        path="/interview/:token"
+        element={<CandidateInterview />}
+      />
 
 
       {/* ========================================

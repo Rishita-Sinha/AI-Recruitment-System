@@ -86,6 +86,18 @@ export const uploadResume = (formData) =>
 
 
 // =========================================================
+// BATCH RESUME UPLOAD
+// =========================================================
+
+export const uploadResumes = (formData) =>
+  api.post("/upload-resumes", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+
+
+// =========================================================
 // CANDIDATES
 // =========================================================
 
@@ -121,11 +133,65 @@ export const askRecruiterAI = (question) =>
 
 
 // =========================================================
+// CANDIDATE AI INTERVIEW
+// =========================================================
+
+// Get interview details using the public token
+export const getInterview = (token) =>
+  api.get(`/interviews/${token}`);
+
+
+// Start the interview
+export const startInterview = (token) =>
+  api.post(`/interviews/${token}/start`);
+
+
+// Submit candidate answer
+export const submitInterviewAnswer = (token, answer) =>
+  api.post(`/interviews/${token}/answer`, {
+    answer,
+  });
+
+
+// Create a new candidate interview
+export const createInterview = (candidateId, jobMatchId) =>
+  api.post("/interviews/create", null, {
+    params: {
+      candidate_id: candidateId,
+      job_match_id: jobMatchId,
+    },
+  });
+
+
+// Get completed interview results
+export const getInterviewResults = (interviewId) =>
+  api.get(`/interviews/${interviewId}/results`);
+
+
+// =========================================================
 // DASHBOARD
 // =========================================================
 
 export const getDashboard = () =>
   api.get("/dashboard");
 
+
+// =========================================================
+// LLM CONFIGURATION
+// =========================================================
+
+export const getLLMConfigs = () =>
+  api.get("/llm/configs");
+
+export const createLLMConfig = (data) =>
+  api.post("/llm/configs", data);
+
+export const activateLLMConfig = (id) =>
+  api.put(`/llm/configs/${id}/activate`);
+
+
+// =========================================================
+// EXPORT API
+// =========================================================
 
 export default api;

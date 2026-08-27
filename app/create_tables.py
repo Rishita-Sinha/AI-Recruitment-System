@@ -5,6 +5,9 @@ from app.models import (
     Candidate,
     Recruiter,
     JobMatch,
+    LLMConfig,
+    Interview,
+    InterviewAnswer,
 )
 
 

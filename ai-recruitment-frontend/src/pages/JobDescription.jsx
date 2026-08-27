@@ -16,6 +16,10 @@ function JobDescription() {
     description: "",
   });
 
+  // =========================================================
+  // Handle Form Changes
+  // =========================================================
+
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -23,38 +27,84 @@ function JobDescription() {
     });
   };
 
+  // =========================================================
+  // Submit Job Description
+  // =========================================================
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
       const response = await matchJob(formData);
 
-      console.log(response.data);
+      console.log("JOB MATCH RESPONSE:", response.data);
 
+      // Get the job match ID created by the backend
+      const jobMatchId = response.data.job_match_id;
+
+      console.log("JOB MATCH ID:", jobMatchId);
+
+      // Make sure backend returned the job match ID
+      if (!jobMatchId) {
+        console.error(
+          "Job match ID was not returned by the backend."
+        );
+
+        alert(
+          "Job matching succeeded, but the Job Match ID was not received."
+        );
+
+        return;
+      }
+
+      // Navigate to Candidate Ranking
+      // and pass BOTH candidates and jobMatchId
       navigate("/candidate-ranking", {
         state: {
           candidates: response.data.ranked_candidates,
+          jobMatchId: jobMatchId,
         },
       });
 
     } catch (error) {
-      console.error(error);
-      alert("Failed to find candidates.");
+      console.error("Job matching error:", error);
+
+      alert(
+        error.response?.data?.detail ||
+        "Failed to find candidates."
+      );
     }
   };
+
+  // =========================================================
+  // Page
+  // =========================================================
 
   return (
     <MainLayout>
       <div className="max-w-4xl mx-auto">
 
+        {/* =====================================================
+            Page Header
+        ===================================================== */}
+
         <h1 className="text-3xl font-bold mb-8">
           Job Description
         </h1>
+
+        {/* =====================================================
+            Job Description Form
+        ===================================================== */}
 
         <form
           onSubmit={handleSubmit}
           className="bg-white shadow rounded-xl p-8 space-y-6"
         >
+
+          {/* ===================================================
+              Job Title
+          =================================================== */}
+
           <div>
             <label className="block font-semibold mb-2">
               Job Title
@@ -70,6 +120,10 @@ function JobDescription() {
               required
             />
           </div>
+
+          {/* ===================================================
+              Experience
+          =================================================== */}
 
           <div>
             <label className="block font-semibold mb-2">
@@ -87,6 +141,10 @@ function JobDescription() {
             />
           </div>
 
+          {/* ===================================================
+              Skills
+          =================================================== */}
+
           <div>
             <label className="block font-semibold mb-2">
               Required Skills
@@ -102,6 +160,11 @@ function JobDescription() {
               required
             />
           </div>
+
+          {/* ===================================================
+              Qualification
+          =================================================== */}
+
           <div>
             <label className="block font-semibold mb-2">
               Required Qualification
@@ -117,6 +180,11 @@ function JobDescription() {
               required
             />
           </div>
+
+          {/* ===================================================
+              Location
+          =================================================== */}
+
           <div>
             <label className="block font-semibold mb-2">
               Preferred Location
@@ -131,6 +199,10 @@ function JobDescription() {
               placeholder="Guwahati, Bangalore, Remote..."
             />
           </div>
+
+          {/* ===================================================
+              Job Description
+          =================================================== */}
 
           <div>
             <label className="block font-semibold mb-2">
@@ -148,9 +220,21 @@ function JobDescription() {
             />
           </div>
 
+          {/* ===================================================
+              Submit Button
+          =================================================== */}
+
           <button
             type="submit"
-            className="bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700"
+            className="
+              bg-indigo-600
+              text-white
+              px-6
+              py-3
+              rounded-lg
+              hover:bg-indigo-700
+              font-semibold
+            "
           >
             Find Candidates
           </button>

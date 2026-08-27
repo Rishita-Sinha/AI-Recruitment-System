@@ -1,11 +1,84 @@
 import { useLocation, useNavigate } from "react-router-dom";
+import { useState } from "react";
 import MainLayout from "../layouts/MainLayout";
+import {
+  createInterview,
+  getInterviewResults,
+} from "../services/api";
 
 function CandidateProfile() {
   const location = useLocation();
   const navigate = useNavigate();
 
   const candidate = location.state?.candidate;
+  const [interviewLink, setInterviewLink] = useState("");
+  const [interviewLoading, setInterviewLoading] = useState(false);
+  const [interviewError, setInterviewError] = useState("");
+  const [interviewId, setInterviewId] = useState("");
+  const [interviewResults, setInterviewResults] = useState(null);
+  const [resultsLoading, setResultsLoading] = useState(false);
+  const [resultsError, setResultsError] = useState("");
+  const generateInterviewLink = async () => {
+  setInterviewLoading(true);
+  setInterviewError("");
+  setInterviewLink("");
+
+  try {
+    const jobMatchId = candidate.job_match_id;
+
+    if (!jobMatchId) {
+      setInterviewError(
+        "Job information is missing for this candidate."
+      );
+      return;
+    }
+
+    const response = await createInterview(
+      candidate.id,
+      jobMatchId
+    );
+
+    const token = response.data.token;
+    const newInterviewId = response.data.interview_id;
+
+    setInterviewId(newInterviewId);
+
+    const link = `${window.location.origin}/interview/${token}`;
+
+    setInterviewLink(link);
+  } catch (error) {
+    console.error("Interview creation error:", error);
+
+    setInterviewError(
+      error.response?.data?.detail ||
+      "Failed to generate interview link."
+    );
+  } finally {
+    setInterviewLoading(false);
+  }
+};
+    const loadInterviewResults = async (interviewId) => {
+  setResultsLoading(true);
+  setResultsError("");
+
+  try {
+    const response = await getInterviewResults(interviewId);
+
+    setInterviewResults(response.data);
+  } catch (error) {
+    console.error(
+      "Error loading interview results:",
+      error
+    );
+
+    setResultsError(
+      error.response?.data?.detail ||
+      "Unable to load interview results."
+    );
+  } finally {
+    setResultsLoading(false);
+  }
+};
 
   if (!candidate) {
     return (
@@ -519,6 +592,8 @@ function CandidateProfile() {
           )}
 
           <button
+            onClick={generateInterviewLink}
+            disabled={interviewLoading}
             className="
               px-6
               py-3
@@ -527,12 +602,149 @@ function CandidateProfile() {
               hover:bg-emerald-700
               text-white
               font-semibold
+              disabled:opacity-50
+              disabled:cursor-not-allowed
             "
           >
-            Ask AI Recruiter
+            {interviewLoading
+              ? "Generating..."
+              : "Generate Interview Link"}
           </button>
 
         </div>
+
+                {/* Interview Link Result */}
+
+        {interviewError && (
+          <div className="mt-6 text-center text-red-600 font-semibold">
+            {interviewError}
+          </div>
+        )}
+
+        {interviewLink && (
+          <div className="mt-6 p-6 bg-green-50 border border-green-200 rounded-xl text-center">
+            <p className="font-semibold text-green-700 mb-3">
+              Interview link generated successfully!
+            </p>
+
+            <div className="flex gap-3 justify-center">
+              <input
+                type="text"
+                value={interviewLink}
+                readOnly
+                className="w-full max-w-xl px-4 py-3 border rounded-lg bg-white"
+              />
+
+              <button
+                onClick={() =>
+                  navigator.clipboard.writeText(interviewLink)
+                }
+                className="px-5 py-3 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold"
+              >
+                Copy
+              </button>
+            </div>
+
+            <button
+              onClick={() => window.open(interviewLink, "_blank")}
+              className="mt-4 px-5 py-3 rounded-lg border border-indigo-600 text-indigo-600 hover:bg-indigo-50 font-semibold"
+            >
+              Open Interview
+            </button>
+
+            {interviewId && (
+              <button
+                onClick={() => loadInterviewResults(interviewId)}
+                disabled={resultsLoading}
+                className="mt-4 ml-3 px-5 py-3 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {resultsLoading ? "Loading Results..." : "View Interview Results"}
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* Interview Results */}
+
+        {resultsError && (
+          <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-xl text-center text-red-600 font-semibold">
+            {resultsError}
+          </div>
+        )}
+
+        {interviewResults && (
+          <div className="mt-10 space-y-6">
+
+            <div className="bg-white rounded-2xl shadow p-8">
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-800">
+                    Interview Results
+                  </h2>
+                  <p className="text-gray-500 mt-1">
+                    {interviewResults.candidate?.name || candidate.name}
+                  </p>
+                </div>
+
+                <span
+                  className={`px-4 py-2 rounded-full font-semibold ${
+                    interviewResults.interview?.status === "completed"
+                      ? "bg-green-100 text-green-700"
+                      : "bg-yellow-100 text-yellow-700"
+                  }`}
+                >
+                  {interviewResults.interview?.status || "Unknown"}
+                </span>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-2xl shadow p-8">
+              <h2 className="text-2xl font-bold mb-5">
+                AI Interview Summary
+              </h2>
+
+              <div className="whitespace-pre-wrap text-gray-700 leading-8">
+                {interviewResults.interview?.summary || "Summary not available yet."}
+              </div>
+            </div>
+
+            <div className="bg-white rounded-2xl shadow p-8">
+              <h2 className="text-2xl font-bold mb-6">
+                Candidate Answers
+              </h2>
+
+              {interviewResults.answers?.length > 0 ? (
+                <div className="space-y-6">
+                  {interviewResults.answers.map((item) => (
+                    <div
+                      key={item.question_number}
+                      className="border rounded-2xl p-6"
+                    >
+                      <h3 className="text-lg font-bold text-gray-800 mb-3">
+                        Question {item.question_number}
+                      </h3>
+
+                      <p className="font-semibold text-gray-800 leading-7 mb-4">
+                        {item.question}
+                      </p>
+
+                      <div className="bg-gray-50 rounded-xl p-5">
+                        <p className="text-gray-700 leading-7 whitespace-pre-wrap">
+                          {item.answer}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-500">
+                  No interview answers are available.
+                </p>
+              )}
+            </div>
+
+          </div>
+        )}
 
         {/* Footer */}
 

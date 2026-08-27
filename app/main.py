@@ -9,7 +9,9 @@ from app.routers.candidates import router as candidates_router
 from app.routers.jobs import router as jobs_router
 from app.routers.chat import router as chat_router
 from app.routers.dashboard import router as dashboard_router
+from app.routers.llm import router as llm_router
 from app.routers.auth import router as auth_router
+from app.routers.interviews import router as interviews_router
 app = FastAPI(
     title="AI Resume Screening API",
     version="1.0.0",
@@ -63,3 +65,5 @@ app.include_router(jobs_router)
 app.include_router(chat_router)
 app.include_router(dashboard_router)
 app.include_router(auth_router)
+app.include_router(llm_router)
+app.include_router(interviews_router)

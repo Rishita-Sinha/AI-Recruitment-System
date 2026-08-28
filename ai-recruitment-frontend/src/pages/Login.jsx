@@ -497,8 +497,11 @@ function Login() {
               </label>
 
 
+              {/* ================= FORGOT PASSWORD ================= */}
+
               <button
                 type="button"
+                onClick={() => navigate("/forgot-password")}
                 disabled={loading}
                 className="
                   text-sm

@@ -1,6 +1,8 @@
 import { Routes, Route } from "react-router-dom";
 
 import Login from "./pages/Login";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
 import UploadResume from "./pages/UploadResume";
@@ -24,14 +26,30 @@ function App() {
           PUBLIC ROUTES
       ======================================== */}
 
-      <Route path="/" element={<Login />} />
+      {/* First page when opening the application */}
+      <Route path="/" element={<Signup />} />
 
+      {/* Login */}
       <Route path="/login" element={<Login />} />
 
+      {/* Signup */}
       <Route path="/signup" element={<Signup />} />
 
+      {/* Forgot Password */}
+      <Route
+        path="/forgot-password"
+        element={<ForgotPassword />}
+      />
+
+      {/* Reset Password */}
+      <Route
+        path="/reset-password"
+        element={<ResetPassword />}
+      />
+
+
       {/* ========================================
-         PUBLIC CANDIDATE INTERVIEW
+          PUBLIC CANDIDATE INTERVIEW
       ======================================== */}
 
       <Route
@@ -44,6 +62,8 @@ function App() {
           PROTECTED ROUTES
       ======================================== */}
 
+      {/* Dashboard */}
+
       <Route
         path="/dashboard"
         element={
@@ -52,6 +72,7 @@ function App() {
           </ProtectedRoute>
         }
       />
+
 
       {/* Resume Upload */}
 
@@ -131,7 +152,7 @@ function App() {
       />
 
 
-      {/* AI Recruiter */}
+      {/* AI Recruiter / Chatbot */}
 
       <Route
         path="/chatbot"

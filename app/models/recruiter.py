@@ -39,6 +39,25 @@ class Recruiter(Base):
         nullable=False
     )
 
+    # =====================================================
+    # Password Reset
+    # =====================================================
+
+    reset_token = Column(
+        String,
+        nullable=True,
+        unique=True,
+        index=True
+    )
+
+    reset_token_expires = Column(
+        DateTime(timezone=True),
+        nullable=True
+    )
+
+    # =====================================================
+    # Account Creation
+    # =====================================================
 
     created_at = Column(
         DateTime(timezone=True),

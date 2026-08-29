@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   User,
   Mail,
@@ -12,6 +13,8 @@ import {
 import logo from "../assets/vays-logo.png";
 
 function Signup() {
+  const navigate = useNavigate();
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -154,9 +157,12 @@ function Signup() {
         confirm_password: "",
       });
 
+      // =========================
       // Redirect to login page
+      // =========================
+
       setTimeout(() => {
-        window.location.href = "/";
+        navigate("/login");
       }, 1800);
     } catch (err) {
       console.error("Registration error:", err);
@@ -793,6 +799,7 @@ function Signup() {
             >
               {loading ? (
                 <span className="flex items-center justify-center gap-2">
+
                   <span
                     className="
                       w-5
@@ -804,7 +811,9 @@ function Signup() {
                       animate-spin
                     "
                   />
+
                   Creating Account...
+
                 </span>
               ) : (
                 "Create Account"
@@ -831,7 +840,7 @@ function Signup() {
             <button
               type="button"
               onClick={() => {
-                window.location.href = "/";
+                navigate("/login");
               }}
               className="
                 text-[#08AFC7]
@@ -843,6 +852,7 @@ function Signup() {
             >
               Login
             </button>
+
           </p>
 
 

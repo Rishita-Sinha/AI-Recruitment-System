@@ -3,8 +3,6 @@ import { useNavigate } from "react-router-dom";
 import {
   Search,
   Eye,
-  Pencil,
-  Trash2,
   User,
 } from "lucide-react";
 import { getCandidates } from "../services/api";
@@ -16,7 +14,9 @@ function CandidateTable() {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
   const navigate = useNavigate();
+
   useEffect(() => {
     fetchCandidates();
   }, []);
@@ -47,13 +47,14 @@ function CandidateTable() {
         ""
       ).toLowerCase();
 
-      const email = (candidate.email || "").toLowerCase();
+      const email = (
+        candidate.email || ""
+      ).toLowerCase();
 
-     
       const skills = (
         Array.isArray(candidate.skills)
-        ? candidate.skills
-        : []
+          ? candidate.skills
+          : []
       )
         .join(" ")
         .toLowerCase();
@@ -68,6 +69,10 @@ function CandidateTable() {
     setFilteredCandidates(filtered);
   }, [search, candidates]);
 
+  // =========================================================
+  // Loading
+  // =========================================================
+
   if (loading) {
     return (
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
@@ -75,6 +80,10 @@ function CandidateTable() {
       </div>
     );
   }
+
+  // =========================================================
+  // Error
+  // =========================================================
 
   if (error) {
     return (
@@ -87,7 +96,9 @@ function CandidateTable() {
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200">
 
-      {/* Header */}
+      {/* =====================================================
+          Header
+      ===================================================== */}
 
       <div className="flex items-center justify-between p-6 border-b">
 
@@ -100,6 +111,8 @@ function CandidateTable() {
             Showing {filteredCandidates.length} candidate(s)
           </p>
         </div>
+
+        {/* Search */}
 
         <div className="relative w-80">
 
@@ -120,7 +133,10 @@ function CandidateTable() {
 
       </div>
 
-      {/* Table */}
+
+      {/* =====================================================
+          Table
+      ===================================================== */}
 
       <div className="overflow-x-auto">
 
@@ -158,24 +174,30 @@ function CandidateTable() {
 
           </thead>
 
+
           <tbody>
 
             {filteredCandidates.length === 0 ? (
+
               <tr>
+
                 <td
                   colSpan="6"
                   className="text-center py-12 text-gray-500"
                 >
                   No candidates found.
                 </td>
+
               </tr>
+
             ) : (
+
               filteredCandidates.map((candidate) => {
 
-                
                 const skills = Array.isArray(candidate.skills)
-                    ? candidate.skills
-                    : [];
+                  ? candidate.skills
+                  : [];
+
                 const displaySkills = skills.slice(0, 3);
                 const hasMoreSkills = skills.length > 3;
 
@@ -186,7 +208,9 @@ function CandidateTable() {
                     className="border-b hover:bg-gray-50 transition"
                   >
 
-                    {/* Candidate */}
+                    {/* =================================================
+                        Candidate
+                    ================================================= */}
 
                     <td className="px-6 py-5">
 
@@ -204,15 +228,13 @@ function CandidateTable() {
                         <div>
 
                           <p className="font-semibold text-gray-800">
-
-                            {candidate.name ?? candidate.full_name ?? "-"}
-
+                            {candidate.name ??
+                              candidate.full_name ??
+                              "-"}
                           </p>
 
                           <p className="text-sm text-gray-500">
-
                             {candidate.email}
-
                           </p>
 
                         </div>
@@ -221,123 +243,132 @@ function CandidateTable() {
 
                     </td>
 
-                    
-                    {/* Experience */}
+
+                    {/* =================================================
+                        Experience
+                    ================================================= */}
 
                     <td className="px-6 py-5">
 
-                        {Array.isArray(candidate.experience) &&
-                        candidate.experience.length > 0 ? (
+                      {Array.isArray(candidate.experience) &&
+                      candidate.experience.length > 0 ? (
 
-                          <>
-                            <p className="font-semibold text-gray-800">
-                                {
-                                    candidate.experience[
-                                        candidate.experience.length - 1
-                                    ].title
-                                 }
-                            </p>
+                        <>
+                          <p className="font-semibold text-gray-800">
+                            {
+                              candidate.experience[
+                                candidate.experience.length - 1
+                              ].title
+                            }
+                          </p>
 
-                            <p className="text-sm text-gray-500">
-                                {
-                                    candidate.experience[
-                                        candidate.experience.length - 1
-                                    ].company
-                                 }
-                            </p>
-                          </>
+                          <p className="text-sm text-gray-500">
+                            {
+                              candidate.experience[
+                                candidate.experience.length - 1
+                              ].company
+                            }
+                          </p>
+                        </>
 
-                    ) : (
+                      ) : (
 
                         <span className="text-gray-500">
-                            Fresher
+                          Fresher
                         </span>
 
-                    )}
+                      )}
 
                     </td>
 
-                    {/* Skills */}
+
+                    {/* =================================================
+                        Skills
+                    ================================================= */}
 
                     <td className="px-6 py-5">
 
                       <div className="flex flex-wrap gap-2">
 
                         {displaySkills.map((skill, index) => (
+
                           <span
                             key={index}
                             className="bg-indigo-100 text-indigo-700 text-xs font-medium px-3 py-1 rounded-full"
                           >
                             {skill}
                           </span>
+
                         ))}
 
                         {hasMoreSkills && (
+
                           <span className="bg-gray-200 text-gray-600 text-xs font-medium px-3 py-1 rounded-full">
                             ...
                           </span>
+
                         )}
 
                       </div>
 
                     </td>
 
-                    {/* Uploaded */}
 
-                    
+                    {/* =================================================
+                        Uploaded
+                    ================================================= */}
+
                     <td className="px-6 py-5 text-gray-600">
 
-                        {candidate.created_at
-                            ? new Date(candidate.created_at).toLocaleDateString("en-GB", {
-                                day: "2-digit",
-                                month: "short",
-                                year: "numeric",
-                              })
+                      {candidate.created_at
+                        ? new Date(
+                            candidate.created_at
+                          ).toLocaleDateString(
+                            "en-GB",
+                            {
+                              day: "2-digit",
+                              month: "short",
+                              year: "numeric",
+                            }
+                          )
                         : "-"}
 
                     </td>
 
-                    {/* Status */}
+
+                    {/* =================================================
+                        Status
+                    ================================================= */}
 
                     <td className="px-6 py-5">
 
                       <span className="bg-green-100 text-green-700 text-xs font-semibold px-3 py-1 rounded-full">
-
                         Active
-
                       </span>
 
                     </td>
 
-                    {/* Actions */}
+
+                    {/* =================================================
+                        Actions
+                    ================================================= */}
 
                     <td className="px-6 py-5">
 
-                      <div className="flex justify-center gap-2">
+                      <div className="flex justify-center">
 
-                        
-                        <button
-                            onClick={() => navigate(`/candidate/${candidate.id}`)}
-                            className="flex items-center gap-1 bg-blue-50 text-blue-600 px-3 py-2 rounded-lg hover:bg-blue-100 transition"
-                        >
-                            <Eye size={16} />
-                            View
-                        </button>
-
-                        
-                        <button
-                            onClick={() => navigate(`/candidate/edit/${candidate.id}`)}
-                            className="flex items-center gap-1 bg-yellow-50 text-yellow-700 px-3 py-2 rounded-lg hover:bg-yellow-100 transition"
-                        >
-                            <Pencil size={16} />
-                             Edit
-                        </button>
+                        {/* View only */}
 
                         <button
-                          className="flex items-center gap-1 bg-red-50 text-red-600 px-3 py-2 rounded-lg hover:bg-red-100 transition"
+                          onClick={() =>
+                            navigate(
+                              `/candidate/${candidate.id}`
+                            )
+                          }
+                          className="flex items-center gap-1 bg-blue-50 text-blue-600 px-3 py-2 rounded-lg hover:bg-blue-100 transition"
                         >
-                          <Trash2 size={16} />
-                          Delete
+                          <Eye size={16} />
+                          View
                         </button>
 
                       </div>
@@ -348,6 +379,7 @@ function CandidateTable() {
 
                 );
               })
+
             )}
 
           </tbody>
